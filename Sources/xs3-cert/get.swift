@@ -114,14 +114,31 @@ struct Get: AsyncParsableCommand {
                 if !startProcess.isEmpty {
 
                     let process = Process()
+                    let pipe: Pipe = Pipe()
+                    process.standardOutput = pipe
+                    process.standardError = pipe  // Often useful to catch errors too
+
                     process.executableURL = URL(fileURLWithPath: startProcess)
+                    // Set up a read handler to print output in real-time
+                    pipe.fileHandleForReading.readabilityHandler = { fileHandle in
+                        let data = fileHandle.availableData
+                        if let string = String(data: data, encoding: .utf8), !string.isEmpty {
+                            print(string, terminator: "")  // Print directly to current stdout
+                        }
+                    }
                     print("Starting \(startProcess) \(startProcessArgs)")
-                    if (!startProcessArgs.isEmpty) {
+                    if !startProcessArgs.isEmpty {
                         process.arguments = [startProcessArgs]
                     }
-                    try! process.run()
-                    process.waitUntilExit()
-                    print("Finished executing \(startProcess) \(startProcessArgs)")
+                    do {
+                        try process.run()
+                        process.waitUntilExit()
+                        print("Finished executing \(startProcess) \(startProcessArgs)")
+                        // Cleanup handler
+                        pipe.fileHandleForReading.readabilityHandler = nil
+                    } catch {
+                        print("Failed to execute process \(startProcess) \(startProcessArgs): \(error)")
+                    }
                 }
 
             }
