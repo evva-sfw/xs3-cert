@@ -1,0 +1,21 @@
+.DS_Store
+/.build
+/out
+/Packages
+xcuserdata/
+DerivedData/
+.swiftpm/configuration/registries.json
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.netrc
+
+#IDE
+.idea
+.vscode
+
+# Docker tests
+Dockerfile
+runLinuxStatic.sh
+
+# Misc
+test.zip
+
