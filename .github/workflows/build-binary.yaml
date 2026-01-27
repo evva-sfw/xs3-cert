@@ -36,7 +36,9 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           swift build -c release --experimental-lto-mode=full --swift-sdk x86_64-swift-linux-musl
-          .build/release/xs3-cert
+          swift build -c release --experimental-lto-mode=full --swift-sdk aarch64-swift-linux-musl
+          ls -la .build/x86_64-swift-linux-musl/release/xs3-cert
+          ls -la .build/aarch64-swift-linux-musl/release/xs3-cert
           sleep 30
           
 
