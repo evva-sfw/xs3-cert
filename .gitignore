@@ -7,6 +7,7 @@ DerivedData/
 .swiftpm/configuration/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
+/dist
 
 #IDE
 .idea
@@ -14,7 +15,6 @@ DerivedData/
 
 # Docker tests
 Dockerfile
-runLinuxStatic.sh
 
 # Misc
 test.zip

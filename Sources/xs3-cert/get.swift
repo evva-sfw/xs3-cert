@@ -93,9 +93,9 @@ struct Get: AsyncParsableCommand {
                     try mqttConfigResponse.ca.write(
                         toFile: "\(outpath)/ca.pem", atomically: true, encoding: .utf8)
                     try mqttConfigResponse.cert.write(
-                        toFile: "\(outpath)/cert.pem", atomically: true, encoding: .utf8)
+                        toFile: "\(outpath)/mqtt.pem", atomically: true, encoding: .utf8)
                     try mqttConfigResponse.key.write(
-                        toFile: "\(outpath)/key.pem", atomically: true, encoding: .utf8)
+                        toFile: "\(outpath)/mqtt.key", atomically: true, encoding: .utf8)
                     let properties: String =
                         "userid=\(mqttConfigResponse.apiProperties.userId)\nbroker.address=\(mqttConfigResponse.apiProperties.brokerAddress)\nbroker.port=\(mqttConfigResponse.apiProperties.brokerPort)\ntoken=\(mqttConfigResponse.apiProperties.token)\n"
                     try properties.write(
@@ -114,14 +114,31 @@ struct Get: AsyncParsableCommand {
                 if !startProcess.isEmpty {
 
                     let process = Process()
+                    let pipe: Pipe = Pipe()
+                    process.standardOutput = pipe
+                    process.standardError = pipe  // Often useful to catch errors too
+
                     process.executableURL = URL(fileURLWithPath: startProcess)
+                    // Set up a read handler to print output in real-time
+                    pipe.fileHandleForReading.readabilityHandler = { fileHandle in
+                        let data = fileHandle.availableData
+                        if let string = String(data: data, encoding: .utf8), !string.isEmpty {
+                            print(string, terminator: "")  // Print directly to current stdout
+                        }
+                    }
                     print("Starting \(startProcess) \(startProcessArgs)")
-                    if (!startProcessArgs.isEmpty) {
+                    if !startProcessArgs.isEmpty {
                         process.arguments = [startProcessArgs]
                     }
-                    try! process.run()
-                    process.waitUntilExit()
-                    print("Finished executing \(startProcess) \(startProcessArgs)")
+                    do {
+                        try process.run()
+                        process.waitUntilExit()
+                        print("Finished executing \(startProcess) \(startProcessArgs)")
+                        // Cleanup handler
+                        pipe.fileHandleForReading.readabilityHandler = nil
+                    } catch {
+                        print("Failed to execute process \(startProcess) \(startProcessArgs): \(error)")
+                    }
                 }
 
             }
