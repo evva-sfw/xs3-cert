@@ -19,7 +19,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      # Intall Swift and SDK
+      # Install Swift and SDK
       - name: Install dependencies
         run: | 
           curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz && \
@@ -37,6 +37,11 @@ jobs:
         run: |
           swift build -c release --experimental-lto-mode=full --swift-sdk x86_64-swift-linux-musl
           swift build -c release --experimental-lto-mode=full --swift-sdk aarch64-swift-linux-musl
+          ls -la 
+          echo "Checking x86_64-swift-linux-musl"
+          ls -la .build/x86_64-swift-linux-musl/release/xs3-cert
+          echo "Checking aarch64-swift-linux-musl"
+          ls -la .build/aarch64-swift-linux-musl/release/xs3-cert
       
       # Build file upload step...
           
