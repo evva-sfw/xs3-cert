@@ -51,13 +51,13 @@ jobs:
             --blob-url ${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL }}
             --verbose
 
-          # az storage blob show   \
-          # --account-name swdelivery   \
-          # --container-name xs3-tools   \
-          # --name xs3-cert-arm64   \
-          # --sas-token " ${{ secrets.AZURE_SAS_TOKEN }}"   \
-          # --query "{url: url, size: properties.contentLength, lastModified: properties.lastModified}"   \
-          # --output table
+            echo "Upload successful!"
+            az storage blob show   \
+            --account-name swdelivery   \
+            --container-name xs3-tools   \
+            --name xs3-cert-arm64   \
+            --query "{Name:name, size: properties.contentLength, lastModified: properties.lastModified, creationTime: properties.creationTime }"   \
+            --output table 2>/dev/null
 
           
 
