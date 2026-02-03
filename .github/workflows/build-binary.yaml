@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  connect:
+  build-upload-binary:
     runs-on: ubuntu-latest
     steps:
       # Copy repo to action runner
@@ -48,7 +48,7 @@ jobs:
             az storage blob upload \
             --file ${{ github.workspace }}/.build/aarch64-swift-linux-musl/release/xs3-cert \
             --name xs3-cert-arm64 \
-            --blob-url ${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL }}
+            --blob-url ${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL }} \
             --verbose
 
             echo "Upload successful!"
