@@ -48,7 +48,17 @@ jobs:
             az storage blob upload \
             --file ${{ github.workspace }}/.build/aarch64-swift-linux-musl/release/xs3-cert \
             --name xs3-cert-arm64 \
-            --blob-url ${{ secrets.AZURE_SAS_TOKEN }}
+            --blob-url ${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL }}
+            --verbose
+
+          # az storage blob show   \
+          # --account-name swdelivery   \
+          # --container-name xs3-tools   \
+          # --name xs3-cert-arm64   \
+          # --sas-token " ${{ secrets.AZURE_SAS_TOKEN }}"   \
+          # --query "{url: url, size: properties.contentLength, lastModified: properties.lastModified}"   \
+          # --output table
+
           
 
 
