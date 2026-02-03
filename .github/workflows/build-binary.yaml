@@ -35,15 +35,20 @@ jobs:
       - name: Build XS3 Cert Retrieval binary
         working-directory: ${{ github.workspace }}
         run: |
-          swift build -c release --experimental-lto-mode=full --swift-sdk x86_64-swift-linux-musl
           swift build -c release --experimental-lto-mode=full --swift-sdk aarch64-swift-linux-musl
-          ls -la 
-          echo "Checking x86_64-swift-linux-musl"
-          ls -la .build/x86_64-swift-linux-musl/release/xs3-cert
           echo "Checking aarch64-swift-linux-musl"
           ls -la .build/aarch64-swift-linux-musl/release/xs3-cert
+
       
       # Build file upload step...
+      - name: Upload XS3-Cert binary to Azure Blob Storage 
+        uses: azure/cli@9f7ce6f37c31b777ec6c6b6d1dfe7db79f497956
+        with:
+          inlineScript: |
+            az storage blob upload \
+            --file ${{ github.workspace }}/.build/aarch64-swift-linux-musl/release/xs3-cert \
+            --name xs3-cert-arm64 \
+            --blob-url {{ secrets.AZURE_SAS_TOKEN }}
           
 
 
