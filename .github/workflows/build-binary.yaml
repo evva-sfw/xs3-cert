@@ -48,6 +48,7 @@ jobs:
             az storage blob upload \
               --file ${{ github.workspace }}/.build/aarch64-swift-linux-musl/release/xs3-cert \
               --name xs3-cert-arm64 \
+              --overwrite \
               --blob-url ${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL }} 
 
             echo "Upload successful!"
