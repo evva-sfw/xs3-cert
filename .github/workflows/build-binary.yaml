@@ -52,7 +52,7 @@ jobs:
             --tags \
               version=0.0.1 \
               arch=arm64 \
-              git_sha=${GITHUB_SHA}
+              git_sha=${{ github.sha }}
 
             echo "Upload successful!"
             az storage blob show   \
