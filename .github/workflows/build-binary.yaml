@@ -53,9 +53,12 @@ jobs:
 
             echo "Upload successful!"
             echo "MD5SUM of xs3-cert is $(md5sum ${{ github.workspace }}/.build/aarch64-swift-linux-musl/release/xs3-cert)"
-          # az storage blob show \
-          # --query "{Name:name, size: properties.contentLength, lastModified: properties.lastModified, creationTime: properties.creationTime}" \
-          # --blob-url "${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL }}""
+            az storage blob show   \
+              --account-name swdelivery   \
+              --container-name xs3-tools   \
+              --name xs3-cert-arm64   \
+              --query "{Name:name, size: properties.contentLength, lastModified: properties.lastModified, creationTime: properties.creationTime }"   \
+              --output table 2>/dev/null
 
           
 
