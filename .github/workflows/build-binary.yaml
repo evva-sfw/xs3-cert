@@ -1,4 +1,4 @@
-name:  build-binary
+name:  binary-build-and-upload
 
 on:
   push:
@@ -39,18 +39,22 @@ jobs:
           echo "Checking aarch64-swift-linux-musl"
           ls -la .build/aarch64-swift-linux-musl/release/xs3-cert
 
+          swift build -c release --experimental-lto-mode=full --swift-sdk x86_64-swift-linux-musl
+          echo "Checking x86_64-swift-linux-musl"
+          ls -la .build/x86_64-swift-linux-musl/release/xs3-cert
+
       
       # Build file upload step...
       - name: Upload XS3-Cert binary to Azure Blob Storage 
         uses: azure/cli@9f7ce6f37c31b777ec6c6b6d1dfe7db79f497956
         with:
           inlineScript: |
+            echo "Uploading xs3-cert-arm64..."
             az storage blob upload \
               --file ${{ github.workspace }}/.build/aarch64-swift-linux-musl/release/xs3-cert \
               --name xs3-cert-arm64 \
               --overwrite true \
-              --blob-url "${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL }}"
-
+              --blob-url "${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL_ARM64 }}"
             echo "Upload successful!"
             echo "MD5SUM of xs3-cert is $(md5sum ${{ github.workspace }}/.build/aarch64-swift-linux-musl/release/xs3-cert)"
             az storage blob show   \
@@ -60,6 +64,20 @@ jobs:
               --query "{Name:name, size: properties.contentLength, lastModified: properties.lastModified, creationTime: properties.creationTime }"   \
               --output table 2>/dev/null
 
+            echo "Uploading xs3-cert-amd64..."
+            az storage blob upload \
+              --file ${{ github.workspace }}/.build/x86_64-swift-linux-musl/release/xs3-cert \
+              --name xs3-cert-amd64 \
+              --overwrite true \
+              --blob-url "${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL_AMD64 }}"
+            echo "Upload successful!"
+            echo "MD5SUM of xs3-cert is $(md5sum ${{ github.workspace }}/.build/x86_64-swift-linux-musl/release/xs3-cert)"
+            az storage blob show   \
+              --account-name swdelivery   \
+              --container-name xs3-tools   \
+              --name xs3-cert-amd64   \
+              --query "{Name:name, size: properties.contentLength, lastModified: properties.lastModified, creationTime: properties.creationTime }"   \
+              --output table 2>/dev/null
           
 
 
