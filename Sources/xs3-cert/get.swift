@@ -97,7 +97,7 @@ struct Get: AsyncParsableCommand {
                     try mqttConfigResponse.key.write(
                         toFile: "\(outpath)/mqtt.key", atomically: true, encoding: .utf8)
                     let properties: String =
-                        "userid=\(mqttConfigResponse.apiProperties.userId)\nbroker.address=\(mqttConfigResponse.apiProperties.brokerAddress)\nbroker.port=\(mqttConfigResponse.apiProperties.brokerPort)\ntoken=\(mqttConfigResponse.apiProperties.token)\n"
+                        "userid=\(mqttConfigResponse.apiProperties.userId)\nbroker.address=\(mqttConfigResponse.apiProperties.brokerAddress)\nbroker.port=\(mqttConfigResponse.apiProperties.brokerPort)\ntoken=\(mqttConfigResponse.apiProperties.token)\nbackend.address=\((xs3Url))\n"
                     try properties.write(
                         toFile: "\(outpath)/mqtt.properties", atomically: true, encoding: .utf8)
 
