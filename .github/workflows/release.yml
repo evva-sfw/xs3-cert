@@ -53,19 +53,23 @@ jobs:
 
       # Get the latest tag info, increment it accordingly, update the versioninfo.swift file so it is built with new version
       - name: Update version info for binary build
-        run: 
+        env:
+          VERSION_TYPE: ${{ github.event.inputs.input_version }}
+        run: |
           git fetch --tags           
           LAST_RELEASE=$(git tag --sort=-v:refname | head -n 1)
-          if [ "${{ github.event.inputs.input_version }}" == "major" ]; then
+
+          if [ "$VERSION_TYPE" == "major" ]; then 
             NEW_TAG=$(echo "$LAST_RELEASE" | awk -F. '{$1 = $1 + 1; $2 = 0; $3 = 0;} 1' OFS=.)
-          elif [ "${{ github.event.inputs.input_version }}" == "minor" ]; then
+          elif [ "$VERSION_TYPE" == "minor" ]; then
             NEW_TAG=$(echo "$LAST_RELEASE" | awk -F. '{$2 = $2 + 1; $3 = 0;} 1' OFS=.)
-          elif [ "${{ github.event.inputs.input_version }}" == "patch" ]; then
+          elif [ "$VERSION_TYPE" == "patch" ]; then
             NEW_TAG=$(echo "$LAST_RELEASE" | awk -F. '{$NF = $NF + 1;} 1' OFS=.)
           else
             NEW_TAG=$(echo "$LAST_RELEASE" | awk -F. '{$NF = $NF + 1;} 1' OFS=.)
           fi;
           sed -i -E "s/version = \"dev\"/version = \"$NEW_TAG\"/g" ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
+          
           cat ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
       # - name: Run release-it only bump version and generate changelog
       #   run: npx release-it ${{ github.event.inputs.input_version }} --ci --no-github.release
