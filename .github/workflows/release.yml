@@ -49,10 +49,10 @@ jobs:
           node-version: lts/*
       - name: Install node dependencies
         run: npm ci
-      - name: Run release-it only bump version and generate changelog
-        run: npx release-it ${{ github.event.inputs.input_version }} --ci --no-github.release
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      # - name: Run release-it only bump version and generate changelog
+      #   run: npx release-it ${{ github.event.inputs.input_version }} --ci --no-github.release
+      #   env:
+      #     GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
       - name: Extract current version
         id: version
         run: |
@@ -72,19 +72,18 @@ jobs:
       #     files: |
       #       CHANGELOG.md
       #       VERSION
-      - name: Create Tag
-        run: |
-          CURRENT_SHA=$(git rev-parse HEAD)
-          curl -X POST \
-            -H "Authorization: Bearer ${{ steps.app-token.outputs.token }}" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/git/refs \
-            -d @- <<EOF
-          {
-            "ref": "refs/tags/${{ steps.version.outputs.BIN_VERSION }}",
-            "sha": "${{ github.sha }}"
-          }
-          EOF
+      # - name: Create Tag
+      #   run: |
+      #     curl -X POST \
+      #       -H "Authorization: Bearer ${{ steps.app-token.outputs.token }}" \
+      #       -H "Accept: application/vnd.github+json" \
+      #       https://api.github.com/repos/${{ github.repository }}/git/refs \
+      #       -d @- <<EOF
+      #     {
+      #       "ref": "refs/tags/${{ steps.version.outputs.BIN_VERSION }}",
+      #       "sha": "${{ github.sha }}"
+      #     }
+      #     EOF
       # # Checkout the latest commit
       # - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       #   with:
@@ -97,16 +96,16 @@ jobs:
 
 
       # Install Swift and SDK
-      - name: Install dependencies
-        run: | 
-          curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz && \
-          tar zxf swiftly-$(uname -m).tar.gz && \
-          ./swiftly init --quiet-shell-followup && \
-          . "${SWIFTLY_HOME_DIR:-$HOME/.local/share/swiftly}/env.sh" && \
-          hash -r
+      # - name: Install dependencies
+      #   run: | 
+      #     curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz && \
+      #     tar zxf swiftly-$(uname -m).tar.gz && \
+      #     ./swiftly init --quiet-shell-followup && \
+      #     . "${SWIFTLY_HOME_DIR:-$HOME/.local/share/swiftly}/env.sh" && \
+      #     hash -r
 
-          swift sdk install https://download.swift.org/swift-6.2.3-release/static-sdk/swift-6.2.3-RELEASE/swift-6.2.3-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz \
-          --checksum f30ec724d824ef43b5546e02ca06a8682dafab4b26a99fbb0e858c347e507a2c
+      #     swift sdk install https://download.swift.org/swift-6.2.3-release/static-sdk/swift-6.2.3-RELEASE/swift-6.2.3-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz \
+      #     --checksum f30ec724d824ef43b5546e02ca06a8682dafab4b26a99fbb0e858c347e507a2c
 
       # Build binary
       # - name: Build XS3 Cert Retrieval binary
