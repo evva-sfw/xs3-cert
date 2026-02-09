@@ -58,7 +58,7 @@ jobs:
         run: |
           BIN_VERSION=$(grep "version" ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift | sed -E 's/.*"(.*)".*/\1/')
           echo "BIN_VERSION=$BIN_VERSION" >> "$GITHUB_OUTPUT"
-          
+
       # - name: Create commit message
       #   run: |
       #     echo "chore: release ${{ steps.version.outputs.new }}" > commitMessageFile
@@ -162,6 +162,6 @@ jobs:
       - name: Install node dependencies
         run: npm ci
       - name: Run release-it only create release on github
-        run: npx release-it ${{ github.event.inputs.input_version }} --ci --no-git
+        run: npx release-it ${{ github.event.inputs.input_version }} --ci 
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
