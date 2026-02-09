@@ -58,6 +58,7 @@ jobs:
         run: |
           BIN_VERSION=$(grep "version" ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift | sed -E 's/.*"(.*)".*/\1/')
           echo "BIN_VERSION=$BIN_VERSION" >> "$GITHUB_OUTPUT"
+          
       # - name: Create commit message
       #   run: |
       #     echo "chore: release ${{ steps.version.outputs.new }}" > commitMessageFile
