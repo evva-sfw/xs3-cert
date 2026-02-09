@@ -58,6 +58,7 @@ jobs:
         run: |
           git fetch --tags           
           LAST_RELEASE=$(git tag --sort=-v:refname | head -n 1)
+          cp ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift.backup
 
           if [ "$VERSION_TYPE" == "major" ]; then 
             NEW_TAG=$(echo "$LAST_RELEASE" | awk -F. '{$1 = $1 + 1; $2 = 0; $3 = 0;} 1' OFS=.)
@@ -71,6 +72,7 @@ jobs:
           sed -i -E "s/version = \"dev\"/version = \"$NEW_TAG\"/g" ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
 
           cat ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
+          cp ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift.backup ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
       # - name: Run release-it only bump version and generate changelog
       #   run: npx release-it ${{ github.event.inputs.input_version }} --ci --no-github.release
       #   env:
