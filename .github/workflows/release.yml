@@ -146,7 +146,7 @@ jobs:
           ls -la .build/x86_64-swift-linux-musl/release/xs3-cert
 
           cp /tmp/versioninfo.swift.backup ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
-          rm ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift.backup
+        
       
   #      # Upload to Azure blob store
       - name: Upload XS3-Cert binary to Azure Blob Storage 
