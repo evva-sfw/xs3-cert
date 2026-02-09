@@ -20,10 +20,6 @@ jobs:
     env:
       DOCKER_REPO: sfw.evva.com/mundonovo
     steps:
-      - uses: SFW/action-netbird@bb5f0773a09035f62c144cf6df3a3f497bed8afa # 0.0.2
-        with:
-          setup-key: ${{ secrets.NETBIRD_SETUP_KEY }}
-          management-url: ${{ vars.NETBIRD_MANAGEMENT_URL }}
       - uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
         id: app-token
         with:
