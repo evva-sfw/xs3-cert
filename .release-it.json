@@ -20,10 +20,7 @@
     ]
   },
   "plugins": {
-    "@release-it/bumper": {
-      "in": "Sources/xs3-cert/versioninfo.swift",
-      "out": "Sources/xs3-cert/versioninfo.swift"
-    },
+  
     "@release-it/conventional-changelog": {
       "ignoreRecommendedBump": true,
       "infile": "CHANGELOG.md",
