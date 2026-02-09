@@ -22,7 +22,7 @@
   "plugins": {
   
     "@release-it/conventional-changelog": {
-      "ignoreRecommendedBump": true,
+      "ignoreRecommendedBump": false,
       "infile": "CHANGELOG.md",
       "preset": {
         "name": "conventionalcommits",
