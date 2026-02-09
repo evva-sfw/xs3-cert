@@ -55,9 +55,10 @@ jobs:
         run: npx release-it ${{ github.event.inputs.input_version }} --ci --no-github.release
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-      - name: Extract new version
+      - name: Extract current version
         id: version
         run: |
+          chmod +x ${{ github.workspace }}/extract_version.sh 
           ${{ github.workspace }}/extract_version.sh --get-current-version
           echo "new=$(cat VERSION)" >> "$GITHUB_OUTPUT"
       - name: Create commit message
