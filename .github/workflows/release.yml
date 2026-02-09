@@ -1,8 +1,6 @@
 name: Release and publish to sfw.evva.com
 on:
   push:
-    branches:
-      - feat/create-build-workflow
   workflow_dispatch:
     inputs:
       input_version:
@@ -41,7 +39,7 @@ jobs:
         with:
           fetch-tags: true
           token: ${{ steps.app-token.outputs.token }}
-          # ref: ${{ github.head_ref }}
+          ref: ${{ github.head_ref }}
           # Make sure the value of GITHUB_TOKEN will persist in repo's config for release-it to use it later
           # In this case it is a short lived app-token, so its ok
           persist-credentials: true
@@ -165,6 +163,6 @@ jobs:
       - name: Install node dependencies
         run: npm ci
       - name: Run release-it only create release on github
-        run: DEBUG=release-it:* npx release-it minor ${{ github.event.inputs.input_version }} --ci 
+        run: DEBUG=release-it:* npx release-it ${{ github.event.inputs.input_version }} --ci 
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
