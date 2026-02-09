@@ -58,7 +58,7 @@ jobs:
       - name: Extract new version
         id: version
         run: |
-          extract_version.sh --get-current-version
+          ${{ github.workspace }}/extract_version.sh --get-current-version
           echo "new=$(cat VERSION)" >> "$GITHUB_OUTPUT"
       - name: Create commit message
         run: |
@@ -114,7 +114,7 @@ jobs:
         working-directory: ${{ github.workspace }}
         id: build-step
         run: |
-          extract_version.sh --update-new-version
+          ${{ github.workspace }}/extract_version.sh --update-new-version
           swift build -c release --experimental-lto-mode=full --swift-sdk aarch64-swift-linux-musl
           echo "Checking aarch64-swift-linux-musl"
           ls -la .build/aarch64-swift-linux-musl/release/xs3-cert
