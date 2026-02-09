@@ -156,12 +156,12 @@ jobs:
             BIN_VERSION="${{ needs.build-binary.outputs.bin_version }}"
             echo "Uploading xs3-cert-arm64..."
             az storage blob upload \
-              --file ${{ github.workspace }}/xs3-cert-binaries/.build/aarch64-swift-linux-musl/release/xs3-cert \
+              --file ${{ github.workspace }}/.build/aarch64-swift-linux-musl/release/xs3-cert \
               --name xs3-cert-arm64 \
               --overwrite true \
               --blob-url "${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL_ARM64 }}"
             echo "Upload successful!"
-            echo "MD5SUM of xs3-cert is $(md5sum ${{ github.workspace }}/xs3-cert-binaries/.build/aarch64-swift-linux-musl/release/xs3-cert)"
+            echo "MD5SUM of xs3-cert is $(md5sum ${{ github.workspace }}/.build/aarch64-swift-linux-musl/release/xs3-cert)"
             az storage blob show   \
               --account-name swdelivery   \
               --container-name xs3-tools   \
@@ -171,12 +171,12 @@ jobs:
 
             echo "Uploading xs3-cert-amd64..."
             az storage blob upload \
-              --file ${{ github.workspace }}/xs3-cert-binaries/.build/x86_64-swift-linux-musl/release/xs3-cert \
+              --file ${{ github.workspace }}/.build/x86_64-swift-linux-musl/release/xs3-cert \
               --name xs3-cert-amd64 \
               --overwrite true \
               --blob-url "${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL_AMD64 }}"
             echo "Upload successful!"
-            echo "MD5SUM of xs3-cert is $(md5sum ${{ github.workspace }}/xs3-cert-binaries/.build/x86_64-swift-linux-musl/release/xs3-cert)"
+            echo "MD5SUM of xs3-cert is $(md5sum ${{ github.workspace }}/.build/x86_64-swift-linux-musl/release/xs3-cert)"
             az storage blob show   \
               --account-name swdelivery   \
               --container-name xs3-tools   \
