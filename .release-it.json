@@ -17,7 +17,7 @@
       "echo 'Preparing release for version ${version}'"
     ],
     "after:bump": [
-      "npx auto-changelog -c .auto-changelog"
+      
     ]
   },
   "plugins": {
