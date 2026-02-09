@@ -187,6 +187,6 @@ jobs:
       - name: Install node dependencies
         run: npm ci
       - name: Run release-it only create release on github
-        run: DEBUG=release-it:* npx release-it patch ${{ github.event.inputs.input_version }} --ci 
+        run: DEBUG=release-it:* npx release-it patch  --ci 
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
