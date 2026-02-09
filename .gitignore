@@ -10,6 +10,7 @@ DerivedData/
 /dist
 node_modules/
 .github/workflows/backup.yml
+.github/workflows/build.yml
 backup.version.swift
 
 
