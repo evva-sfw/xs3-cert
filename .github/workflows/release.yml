@@ -112,7 +112,6 @@ jobs:
         working-directory: ${{ github.workspace }}
         id: build-step
         run: |
-          ${{ github.workspace }}/extract_version.sh --update-new-version
           swift build -c release --experimental-lto-mode=full --swift-sdk aarch64-swift-linux-musl
           echo "Checking aarch64-swift-linux-musl"
           ls -la .build/aarch64-swift-linux-musl/release/xs3-cert
@@ -120,9 +119,6 @@ jobs:
           swift build -c release --experimental-lto-mode=full --swift-sdk x86_64-swift-linux-musl
           echo "Checking x86_64-swift-linux-musl"
           ls -la .build/x86_64-swift-linux-musl/release/xs3-cert
-
-          BIN_VERSION=$(.build/aarch64-swift-linux-musl/release/xs3-cert version)
-          echo "BIN_VERSION=$BIN_VERSION" >> $GITHUB_OUTPUT
       
   #      # Upload to Azure blob store
   #     - name: Upload XS3-Cert binary to Azure Blob Storage 
