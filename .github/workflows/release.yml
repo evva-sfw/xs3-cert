@@ -58,7 +58,7 @@ jobs:
         run: |
           git fetch --tags           
           LAST_RELEASE=$(git tag --sort=-v:refname | head -n 1)
-          cp ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift.backup
+          cp ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift /tmp/versioninfo.swift.backup
 
           if [ "$VERSION_TYPE" == "major" ]; then 
             NEW_TAG=$(echo "$LAST_RELEASE" | awk -F. '{$1 = $1 + 1; $2 = 0; $3 = 0;} 1' OFS=.)
@@ -145,7 +145,7 @@ jobs:
           echo "Checking x86_64-swift-linux-musl"
           ls -la .build/x86_64-swift-linux-musl/release/xs3-cert
 
-          cp ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift.backup ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
+          cp /tmp/versioninfo.swift.backup ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
           rm ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift.backup
       
   #      # Upload to Azure blob store
