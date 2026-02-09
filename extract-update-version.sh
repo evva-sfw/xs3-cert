@@ -11,6 +11,11 @@ fi;
 # This version info will be used in the binary build
 if [ "$1" == "--update-new-version" ]; then 
     NEW_VERSION=$(cat VERSION | grep "VERSION=" | sed -E 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
-    sed -i -E "s/static let version: String = \"[0-9]+\.[0-9]+\.[0-9]+\";/static let version: String = \"$NEW_VERSION\";/g" Sources/xs3-cert/version.swift
+    sed -i -E "s/version = \"[0-9]+\.[0-9]+\.[0-9]+\";/version = \"$NEW_VERSION\";/g" Sources/xs3-cert/version.swift
     echo "version.swift file has been updated with new version $NEW_VERSION information..."
 fi;
+
+
+echo "$LAST_RELEASE" | awk -F. '{$NF = $NF + 1;} 1' OFS=.
+echo "$LAST_RELEASE" | awk -F. '{$2 = $2 + 1; $3 = 0;} 1' OFS=.
+echo "$LAST_RELEASE" | awk -F. '{$1 = $1 + 1; $2 = 0; $3 = 0;} 1' OFS=.
