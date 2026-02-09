@@ -1,6 +1,8 @@
 name: Release and publish to sfw.evva.com
 on:
   push:
+    branches:
+      - feat/create-build-workflow
   workflow_dispatch:
     inputs:
       input_version:
