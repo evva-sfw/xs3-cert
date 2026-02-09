@@ -1,5 +1,6 @@
 name: Release and publish to sfw.evva.com
 on:
+  push:
   workflow_dispatch:
     inputs:
       input_version:
