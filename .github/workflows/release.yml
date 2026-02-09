@@ -53,11 +53,11 @@ jobs:
       #   run: npx release-it ${{ github.event.inputs.input_version }} --ci --no-github.release
       #   env:
       #     GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-      - name: Extract current version
-        id: version
-        run: |
-          BIN_VERSION=$(grep "version" ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift | sed -E 's/.*"(.*)".*/\1/')
-          echo "BIN_VERSION=$BIN_VERSION" >> "$GITHUB_OUTPUT"
+      # - name: Extract current version
+      #   id: version
+      #   run: |
+      #     BIN_VERSION=$(grep "version" ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift | sed -E 's/.*"(.*)".*/\1/')
+      #     echo "BIN_VERSION=$BIN_VERSION" >> "$GITHUB_OUTPUT"
 
       # - name: Create commit message
       #   run: |
@@ -162,6 +162,6 @@ jobs:
       - name: Install node dependencies
         run: npm ci
       - name: Run release-it only create release on github
-        run: npx release-it ${{ github.event.inputs.input_version }} --ci 
+        run: DEBUG=release-it:* npx release-it ${{ github.event.inputs.input_version }} --ci 
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
