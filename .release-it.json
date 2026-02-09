@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/release-it@19/schema/release-it.json",
   "git": {
     "commit": false,
-    "tag": true,
+    "tag": false,
     "push": false
   },
   "github": {
@@ -20,7 +20,11 @@
     ]
   },
   "plugins": {
-      "@release-it/conventional-changelog": {
+    "@release-it/bumper": {
+      "in": "Sources/xs3-cert/versioninfo.swift",
+      "out": "Sources/xs3-cert/versioninfo.swift"
+    },
+    "@release-it/conventional-changelog": {
       "ignoreRecommendedBump": true,
       "infile": "CHANGELOG.md",
       "preset": {
