@@ -8,6 +8,10 @@ DerivedData/
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
 /dist
+node_modules/
+.github/workflows/backup.yml
+backup.version.swift
+
 
 #IDE
 .idea

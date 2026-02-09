@@ -1,0 +1,175 @@
+name: Release and publish to sfw.evva.com
+on:
+  workflow_dispatch:
+    inputs:
+      input_version:
+        type: choice
+        description: What type of release?
+        options:
+          - ""
+          - patch
+          - minor
+          - major
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+# Dont need permissions because we use github app and not the workflow permissions
+permissions: {}
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_REPO: sfw.evva.com/mundonovo
+    steps:
+      - uses: SFW/action-netbird@bb5f0773a09035f62c144cf6df3a3f497bed8afa # 0.0.2
+        with:
+          setup-key: ${{ secrets.NETBIRD_SETUP_KEY }}
+          management-url: ${{ vars.NETBIRD_MANAGEMENT_URL }}
+      - uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
+        id: app-token
+        with:
+          # required
+          # Appid from this app: https://evva.ghe.com/apps/p-lehner/evva-bee
+          app-id: ${{ vars.APP_ID }}
+          # Private key from vault https://vault.service.consul:8200/ui/vault/secrets/secret/show/infrastructure/services/external/github-enterprise/github-apps/evva-bee
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      - name: Get GitHub App User ID
+        id: get-user-id
+        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_HOST: evva.ghe.com
+      - run: |
+          git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
+          git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com'
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          ref: ${{ github.head_ref }}
+          # Make sure the value of GITHUB_TOKEN will persist in repo's config for release-it to use it later
+          # In this case it is a short lived app-token, so its ok
+          persist-credentials: true
+          fetch-depth: 0 # For release-it and auto-changelog to be able to generate the full changelog
+      - name: Setup Node.js
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: lts/*
+      - name: Install node dependencies
+        run: npm ci
+      - name: Run release-it only bump version and generate changelog
+        run: npx release-it ${{ github.event.inputs.input_version }} --ci --no-github.release
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Extract new version
+        id: version
+        run: |
+          extract_version.sh --get-current-version
+          echo "new=$(cat VERSION)" >> "$GITHUB_OUTPUT"
+      - name: Create commit message
+        run: |
+          echo "chore: release ${{ steps.version.outputs.new }}" > commitMessageFile
+      - name: Commit changes
+        uses: iarekylew00t/verified-bot-commit@68c52beb4042b7038cf40c4daf6e469f118c686b # v2.0.5
+        id: commit
+        with:
+          message-file: commitMessageFile
+          token: ${{ steps.app-token.outputs.token }}
+          if-no-commit: notice
+          update-local: true
+          files: |
+            CHANGELOG.md
+            VERSION
+      - name: Create Tag
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ steps.app-token.outputs.token }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.evva.ghe.com/repos/${{ github.repository }}/git/refs \
+            -d @- <<EOF
+          {
+            "ref": "refs/tags/${{ steps.version.outputs.new }}",
+            "sha": "${{ steps.commit.outputs.commit }}"
+          }
+          EOF
+      # Checkout the latest commit
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          ref: ${{ github.head_ref }}
+          # Make sure the value of GITHUB_TOKEN will persist in repo's config for release-it to use it later
+          # In this case it is a short lived app-token, so its ok
+          persist-credentials: true
+          fetch-depth: 0 # For release-it and auto-changelog to be able to generate the full changelog
+
+
+      # Install Swift and SDK
+      - name: Install dependencies
+        run: | 
+          curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz && \
+          tar zxf swiftly-$(uname -m).tar.gz && \
+          ./swiftly init --quiet-shell-followup && \
+          . "${SWIFTLY_HOME_DIR:-$HOME/.local/share/swiftly}/env.sh" && \
+          hash -r
+
+          swift sdk install https://download.swift.org/swift-6.2.3-release/static-sdk/swift-6.2.3-RELEASE/swift-6.2.3-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz \
+          --checksum f30ec724d824ef43b5546e02ca06a8682dafab4b26a99fbb0e858c347e507a2c
+
+      # Build binary
+      - name: Build XS3 Cert Retrieval binary
+        working-directory: ${{ github.workspace }}
+        id: build-step
+        run: |
+          extract_version.sh --update-new-version
+          swift build -c release --experimental-lto-mode=full --swift-sdk aarch64-swift-linux-musl
+          echo "Checking aarch64-swift-linux-musl"
+          ls -la .build/aarch64-swift-linux-musl/release/xs3-cert
+
+          swift build -c release --experimental-lto-mode=full --swift-sdk x86_64-swift-linux-musl
+          echo "Checking x86_64-swift-linux-musl"
+          ls -la .build/x86_64-swift-linux-musl/release/xs3-cert
+
+          BIN_VERSION=$(.build/aarch64-swift-linux-musl/release/xs3-cert version)
+          echo "BIN_VERSION=$BIN_VERSION" >> $GITHUB_OUTPUT
+      
+  #      # Upload to Azure blob store
+  #     - name: Upload XS3-Cert binary to Azure Blob Storage 
+  #       uses: azure/cli@9f7ce6f37c31b777ec6c6b6d1dfe7db79f497956
+  #       with:
+  #         inlineScript: |
+  #           BIN_VERSION="${{ needs.build-binary.outputs.bin_version }}"
+  #           echo "Uploading xs3-cert-arm64..."
+  #           az storage blob upload \
+  #             --file ${{ github.workspace }}/xs3-cert-binaries/.build/aarch64-swift-linux-musl/release/xs3-cert \
+  #             --name xs3-cert-arm64 \
+  #             --overwrite true \
+  #             --blob-url "${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL_ARM64 }}"
+  #           echo "Upload successful!"
+  #           echo "MD5SUM of xs3-cert is $(md5sum ${{ github.workspace }}/xs3-cert-binaries/.build/aarch64-swift-linux-musl/release/xs3-cert)"
+  #           az storage blob show   \
+  #             --account-name swdelivery   \
+  #             --container-name xs3-tools   \
+  #             --name xs3-cert-arm64   \
+  #             --query "{Name:name, size: properties.contentLength, lastModified: properties.lastModified, creationTime: properties.creationTime }"   \
+  #             --output table 2>/dev/null
+
+  #           echo "Uploading xs3-cert-amd64..."
+  #           az storage blob upload \
+  #             --file ${{ github.workspace }}/xs3-cert-binaries/.build/x86_64-swift-linux-musl/release/xs3-cert \
+  #             --name xs3-cert-amd64 \
+  #             --overwrite true \
+  #             --blob-url "${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL_AMD64 }}"
+  #           echo "Upload successful!"
+  #           echo "MD5SUM of xs3-cert is $(md5sum ${{ github.workspace }}/xs3-cert-binaries/.build/x86_64-swift-linux-musl/release/xs3-cert)"
+  #           az storage blob show   \
+  #             --account-name swdelivery   \
+  #             --container-name xs3-tools   \
+  #             --name xs3-cert-amd64   \
+  #             --query "{Name:name, size: properties.contentLength, lastModified: properties.lastModified, creationTime: properties.creationTime }"   \
+  #             --output table 2>/dev/null
+
+      
+      # Generate Changelog and release
+      - name: Install node dependencies
+        run: npm ci
+      - name: Run release-it only create release on github
+        run: npx release-it ${{ github.event.inputs.input_version }} --ci --no-git
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
