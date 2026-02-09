@@ -73,6 +73,7 @@ jobs:
 
           cat ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
           cp ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift.backup ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
+          rm ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift.backup
       # - name: Run release-it only bump version and generate changelog
       #   run: npx release-it ${{ github.event.inputs.input_version }} --ci --no-github.release
       #   env:
