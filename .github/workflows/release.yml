@@ -59,9 +59,9 @@ jobs:
           cp ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift /tmp/versioninfo.swift.backup
 
           if [ -z "$VERSION_TYPE" ]; then
-            npx release-it --no-git.commit --no-git.tag --no-git.push --no-github.release --ci
+            npx release-it --no-git.commit --no-git.tag --no-git.push --no-github.release --ci --no-plugins
           else
-            npx release-it ${{ github.event.inputs.input_version }} -no-git.commit --no-git.tag --no-git.push --no-github.release --ci
+            npx release-it ${{ github.event.inputs.input_version }} -no-git.commit --no-git.tag --no-git.push --no-github.release --ci --no-plugins
           fi
 
           NEW_TAG=$(cat version)
