@@ -153,7 +153,6 @@ jobs:
         uses: azure/cli@9f7ce6f37c31b777ec6c6b6d1dfe7db79f497956
         with:
           inlineScript: |
-            BIN_VERSION="${{ needs.build-binary.outputs.bin_version }}"
             echo "Uploading xs3-cert-arm64..."
             az storage blob upload \
               --file ${{ github.workspace }}/.build/aarch64-swift-linux-musl/release/xs3-cert \
