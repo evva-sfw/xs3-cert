@@ -37,14 +37,13 @@ jobs:
           git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com'
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # For release-it and auto-changelog to be able to generate the full changelog
           fetch-tags: true
           token: ${{ steps.app-token.outputs.token }}
           ref: ${{ github.head_ref }}
           # Make sure the value of GITHUB_TOKEN will persist in repo's config for release-it to use it later
           # In this case it is a short lived app-token, so its ok
           persist-credentials: true
-          fetch-depth: 0 # For release-it and auto-changelog to be able to generate the full changelog
       - name: Setup Node.js
         uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
@@ -121,67 +120,67 @@ jobs:
 
 
       # Install Swift and SDK
-      - name: Install dependencies
-        run: | 
-          curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz && \
-          tar zxf swiftly-$(uname -m).tar.gz && \
-          ./swiftly init --quiet-shell-followup && \
-          . "${SWIFTLY_HOME_DIR:-$HOME/.local/share/swiftly}/env.sh" && \
-          hash -r
+  #     - name: Install dependencies
+  #       run: | 
+  #         curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz && \
+  #         tar zxf swiftly-$(uname -m).tar.gz && \
+  #         ./swiftly init --quiet-shell-followup && \
+  #         . "${SWIFTLY_HOME_DIR:-$HOME/.local/share/swiftly}/env.sh" && \
+  #         hash -r
 
-          swift sdk install https://download.swift.org/swift-6.2.3-release/static-sdk/swift-6.2.3-RELEASE/swift-6.2.3-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz \
-          --checksum f30ec724d824ef43b5546e02ca06a8682dafab4b26a99fbb0e858c347e507a2c
+  #         swift sdk install https://download.swift.org/swift-6.2.3-release/static-sdk/swift-6.2.3-RELEASE/swift-6.2.3-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz \
+  #         --checksum f30ec724d824ef43b5546e02ca06a8682dafab4b26a99fbb0e858c347e507a2c
 
-      # Build binary
-      - name: Build XS3 Cert Retrieval binary
-        working-directory: ${{ github.workspace }}
-        id: build-step
-        run: |
-          swift build -c release --experimental-lto-mode=full --swift-sdk aarch64-swift-linux-musl
-          echo "Checking aarch64-swift-linux-musl"
-          ls -la .build/aarch64-swift-linux-musl/release/xs3-cert
+  #     # Build binary
+  #     - name: Build XS3 Cert Retrieval binary
+  #       working-directory: ${{ github.workspace }}
+  #       id: build-step
+  #       run: |
+  #         swift build -c release --experimental-lto-mode=full --swift-sdk aarch64-swift-linux-musl
+  #         echo "Checking aarch64-swift-linux-musl"
+  #         ls -la .build/aarch64-swift-linux-musl/release/xs3-cert
 
-          swift build -c release --experimental-lto-mode=full --swift-sdk x86_64-swift-linux-musl
-          echo "Checking x86_64-swift-linux-musl"
-          ls -la .build/x86_64-swift-linux-musl/release/xs3-cert
+  #         swift build -c release --experimental-lto-mode=full --swift-sdk x86_64-swift-linux-musl
+  #         echo "Checking x86_64-swift-linux-musl"
+  #         ls -la .build/x86_64-swift-linux-musl/release/xs3-cert
 
-          cp /tmp/versioninfo.swift.backup ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
+  #         cp /tmp/versioninfo.swift.backup ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
         
       
-  #      # Upload to Azure blob store
-      - name: Upload XS3-Cert binary to Azure Blob Storage 
-        uses: azure/cli@9f7ce6f37c31b777ec6c6b6d1dfe7db79f497956
-        with:
-          inlineScript: |
-            echo "Uploading xs3-cert-arm64..."
-            az storage blob upload \
-              --file ${{ github.workspace }}/.build/aarch64-swift-linux-musl/release/xs3-cert \
-              --name xs3-cert-arm64 \
-              --overwrite true \
-              --blob-url "${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL_ARM64 }}"
-            echo "Upload successful!"
-            echo "MD5SUM of xs3-cert is $(md5sum ${{ github.workspace }}/.build/aarch64-swift-linux-musl/release/xs3-cert)"
-            az storage blob show   \
-              --account-name swdelivery   \
-              --container-name xs3-tools   \
-              --name xs3-cert-arm64   \
-              --query "{Name:name, size: properties.contentLength, lastModified: properties.lastModified, creationTime: properties.creationTime }"   \
-              --output table 2>/dev/null
+  # #      # Upload to Azure blob store
+  #     - name: Upload XS3-Cert binary to Azure Blob Storage 
+  #       uses: azure/cli@9f7ce6f37c31b777ec6c6b6d1dfe7db79f497956
+  #       with:
+  #         inlineScript: |
+  #           echo "Uploading xs3-cert-arm64..."
+  #           az storage blob upload \
+  #             --file ${{ github.workspace }}/.build/aarch64-swift-linux-musl/release/xs3-cert \
+  #             --name xs3-cert-arm64 \
+  #             --overwrite true \
+  #             --blob-url "${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL_ARM64 }}"
+  #           echo "Upload successful!"
+  #           echo "MD5SUM of xs3-cert is $(md5sum ${{ github.workspace }}/.build/aarch64-swift-linux-musl/release/xs3-cert)"
+  #           az storage blob show   \
+  #             --account-name swdelivery   \
+  #             --container-name xs3-tools   \
+  #             --name xs3-cert-arm64   \
+  #             --query "{Name:name, size: properties.contentLength, lastModified: properties.lastModified, creationTime: properties.creationTime }"   \
+  #             --output table 2>/dev/null
 
-            echo "Uploading xs3-cert-amd64..."
-            az storage blob upload \
-              --file ${{ github.workspace }}/.build/x86_64-swift-linux-musl/release/xs3-cert \
-              --name xs3-cert-amd64 \
-              --overwrite true \
-              --blob-url "${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL_AMD64 }}"
-            echo "Upload successful!"
-            echo "MD5SUM of xs3-cert is $(md5sum ${{ github.workspace }}/.build/x86_64-swift-linux-musl/release/xs3-cert)"
-            az storage blob show   \
-              --account-name swdelivery   \
-              --container-name xs3-tools   \
-              --name xs3-cert-amd64   \
-              --query "{Name:name, size: properties.contentLength, lastModified: properties.lastModified, creationTime: properties.creationTime }"   \
-              --output table 2>/dev/null
+  #           echo "Uploading xs3-cert-amd64..."
+  #           az storage blob upload \
+  #             --file ${{ github.workspace }}/.build/x86_64-swift-linux-musl/release/xs3-cert \
+  #             --name xs3-cert-amd64 \
+  #             --overwrite true \
+  #             --blob-url "${{ secrets.AZURE_BLOB_UPLOAD_SAS_URL_AMD64 }}"
+  #           echo "Upload successful!"
+  #           echo "MD5SUM of xs3-cert is $(md5sum ${{ github.workspace }}/.build/x86_64-swift-linux-musl/release/xs3-cert)"
+  #           az storage blob show   \
+  #             --account-name swdelivery   \
+  #             --container-name xs3-tools   \
+  #             --name xs3-cert-amd64   \
+  #             --query "{Name:name, size: properties.contentLength, lastModified: properties.lastModified, creationTime: properties.creationTime }"   \
+  #             --output table 2>/dev/null
 
       
       # Generate Changelog and release
