@@ -10,7 +10,11 @@
   "github": {
     "release": true,
     "releaseName": "Release ${version}",
-    "tokenRef": "GITHUB_TOKEN"
+    "tokenRef": "GITHUB_TOKEN",
+    "assets": [
+      ".build/aarch64-swift-linux-musl/release/xs3-cert-arm64",
+      ".build/x86_64-swift-linux-musl/release/xs3-cert-amd64"
+    ]
   },
   "npm": false,
   "hooks": {
@@ -18,7 +22,7 @@
       "echo 'Preparing release for version ${version}'"
     ],
     "after:bump": [
-      
+      "echo ${version} > version"
     ]
   },
   "plugins": {
