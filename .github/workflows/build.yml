@@ -1,7 +1,6 @@
 name:  build-binary
 
 on:
-  push:
   workflow_dispatch:
 
 concurrency:
