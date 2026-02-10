@@ -64,14 +64,13 @@ jobs:
         run: |
           cp ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift /tmp/versioninfo.swift.backup
 
-          if [ -z $VERSION_TYPE ]; then
+          if [ -z "$VERSION_TYPE" ]; then
             npx release-it --no-npm --no-github --no-git.push --ci
-            NEW_TAG=$(cat version)
-          fi
           else
             npx release-it ${{ github.event.inputs.input_version }} --no-npm --no-github --no-git.push --ci
-            NEW_TAG=$(cat version)
-          fi;
+          fi
+          
+          NEW_TAG=$(cat version)
           sed -i -E "s/version = \"dev\"/version = \"$NEW_TAG\"/g" ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
 
           rm version
