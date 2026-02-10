@@ -72,7 +72,6 @@ jobs:
           sed -i -E "s/version = \"dev\"/version = \"$NEW_TAG\"/g" ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
 
           cat ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
-         
       # - name: Run release-it only bump version and generate changelog
       #   run: npx release-it ${{ github.event.inputs.input_version }} --ci --no-github.release
       #   env:
