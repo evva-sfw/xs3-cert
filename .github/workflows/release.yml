@@ -1,4 +1,4 @@
-name: Release and publish to sfw.evva.com
+name: Release and publish to github.com/evva-sfw
 on:
   workflow_dispatch:
     inputs:
@@ -118,6 +118,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           cp /tmp/versioninfo.swift.backup ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
+          rm CHANGELOG.md
           git status
           cat .gitignore
           npx release-it ${{ github.event.inputs.input_version }} --ci
