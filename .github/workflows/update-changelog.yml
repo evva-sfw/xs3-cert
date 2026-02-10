@@ -43,5 +43,11 @@ jobs:
           node-version: lts/*
       - name: Install node dependencies
         run: npm ci
+      - name: Run release-it only create release on github
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          npx release-it ${{ github.event.inputs.input_version }} --ci --git.commit --git.push
+          cat CHANGELOG.md
 
      

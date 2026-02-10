@@ -103,7 +103,6 @@ jobs:
       - name: Remove created files and return to original repo state
         run: |
           cp /tmp/versioninfo.swift.backup ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
-          rm CHANGELOG.md
           rm version
 
       - name: Install node dependencies
