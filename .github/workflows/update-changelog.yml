@@ -43,11 +43,17 @@ jobs:
             node-version: lts/*
         - name: Install node dependencies
           run: npm ci
-        - name: Run release-it only create release on github
-          env:
-            GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        - name: Generate changelog
           run: |
-            npx release-it ${{ github.event.inputs.input_version }} --ci --git.commit --git.push
+            npx auto-changelog -c .auto-changelog
             cat CHANGELOG.md
+
+        - name: Commit & Push changes
+          uses: iarekylew00t/verified-bot-commit@68c52beb4042b7038cf40c4daf6e469f118c686b
+          with:
+            token: ${{ steps.app-token.outputs.token }}
+            message: "docs: Updated changelog"
+            files: |
+              CHANGELOG.md
 
       

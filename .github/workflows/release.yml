@@ -99,7 +99,7 @@ jobs:
           ls -la .build/x86_64-swift-linux-musl/release/xs3-cert-amd64
           echo "MD5 sum of xs3-cert-amd64 is $(md5sum .build/x86_64-swift-linux-musl/release/xs3-cert-amd64)"
 
-      # Remove changelog and release
+      # Return repo to original checked out state
       - name: Remove created files and return to original repo state
         run: |
           cp /tmp/versioninfo.swift.backup ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
