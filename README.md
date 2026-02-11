@@ -1,5 +1,9 @@
 # References
 
+## Description
+This software communicates and retrieve required certificates from a Xesar server using credentials passed as arguments,  
+to support the xs3-io-bridge binary.
+
 ## Local Setup
 
 1. Install an OpenSource [Swift Toolchain](https://www.swift.org/install/) and SDK Bundles for cross compilation.
@@ -25,6 +29,7 @@ swift build -c release --experimental-lto-mode=full --swift-sdk x86_64-swift-lin
 ### Run
 
 To build and run
+
 #### `swift run xs3-cert`
 
 It will compile the Swift code from `Sources/`.
