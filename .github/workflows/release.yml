@@ -70,34 +70,34 @@ jobs:
           cat ${{ github.workspace }}/Sources/xs3-cert/versioninfo.swift
 
 
-      # # Install Swift and SDK
-      # - name: Install dependencies
-      #   run: | 
-      #     curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz && \
-      #     tar zxf swiftly-$(uname -m).tar.gz && \
-      #     ./swiftly init --quiet-shell-followup && \
-      #     . "${SWIFTLY_HOME_DIR:-$HOME/.local/share/swiftly}/env.sh" && \
-      #     hash -r
+      # Install Swift and SDK
+      - name: Install dependencies
+        run: | 
+          curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz && \
+          tar zxf swiftly-$(uname -m).tar.gz && \
+          ./swiftly init --quiet-shell-followup && \
+          . "${SWIFTLY_HOME_DIR:-$HOME/.local/share/swiftly}/env.sh" && \
+          hash -r
 
-      #     swift sdk install https://download.swift.org/swift-6.2.3-release/static-sdk/swift-6.2.3-RELEASE/swift-6.2.3-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz \
-      #     --checksum f30ec724d824ef43b5546e02ca06a8682dafab4b26a99fbb0e858c347e507a2c
+          swift sdk install https://download.swift.org/swift-6.2.3-release/static-sdk/swift-6.2.3-RELEASE/swift-6.2.3-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz \
+          --checksum f30ec724d824ef43b5546e02ca06a8682dafab4b26a99fbb0e858c347e507a2c
 
-      # # Build binary
-      # - name: Build XS3 Cert Retrieval binary
-      #   working-directory: ${{ github.workspace }}
-      #   id: build-step
-      #   run: |
-      #     swift build -c release --experimental-lto-mode=full --swift-sdk aarch64-swift-linux-musl
-      #     echo "Checking aarch64-swift-linux-musl"
-      #     mv .build/aarch64-swift-linux-musl/release/xs3-cert .build/aarch64-swift-linux-musl/release/xs3-cert-arm64
-      #     ls -la .build/aarch64-swift-linux-musl/release/xs3-cert-arm64
-      #     echo "MD5 sum of xs3-cert-arm64 is $(md5sum .build/aarch64-swift-linux-musl/release/xs3-cert-arm64)"
+      # Build binary
+      - name: Build XS3 Cert Retrieval binary
+        working-directory: ${{ github.workspace }}
+        id: build-step
+        run: |
+          swift build -c release --experimental-lto-mode=full --swift-sdk aarch64-swift-linux-musl
+          echo "Checking aarch64-swift-linux-musl"
+          mv .build/aarch64-swift-linux-musl/release/xs3-cert .build/aarch64-swift-linux-musl/release/xs3-cert-arm64
+          ls -la .build/aarch64-swift-linux-musl/release/xs3-cert-arm64
+          echo "MD5 sum of xs3-cert-arm64 is $(md5sum .build/aarch64-swift-linux-musl/release/xs3-cert-arm64)"
 
-      #     swift build -c release --experimental-lto-mode=full --swift-sdk x86_64-swift-linux-musl
-      #     echo "Checking x86_64-swift-linux-musl"
-      #     mv .build/x86_64-swift-linux-musl/release/xs3-cert .build/x86_64-swift-linux-musl/release/xs3-cert-amd64
-      #     ls -la .build/x86_64-swift-linux-musl/release/xs3-cert-amd64
-      #     echo "MD5 sum of xs3-cert-amd64 is $(md5sum .build/x86_64-swift-linux-musl/release/xs3-cert-amd64)"
+          swift build -c release --experimental-lto-mode=full --swift-sdk x86_64-swift-linux-musl
+          echo "Checking x86_64-swift-linux-musl"
+          mv .build/x86_64-swift-linux-musl/release/xs3-cert .build/x86_64-swift-linux-musl/release/xs3-cert-amd64
+          ls -la .build/x86_64-swift-linux-musl/release/xs3-cert-amd64
+          echo "MD5 sum of xs3-cert-amd64 is $(md5sum .build/x86_64-swift-linux-musl/release/xs3-cert-amd64)"
 
       # Remove changelog and release
       - name: Remove created files and return to original repo state
