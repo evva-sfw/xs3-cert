@@ -1,4 +1,4 @@
-name:  build-binary
+name:  build
 
 permissions:
   contents: read
@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-upload-binary:
+  build:
     runs-on: ubuntu-latest
     steps:
       # Copy repo to action runner
