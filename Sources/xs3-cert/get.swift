@@ -12,14 +12,17 @@ struct Get: AsyncParsableCommand {
         abstract: "Obtains the certificates from an XS3 instance."
     )
 
-    @Argument(help: "The XS3 instance URL.")
-    var xs3Url: String
+    @Option(help: "The path of the file to read the parameters from.") 
+    var paramsFile: String = ""
 
-    @Argument(help: "The username.")
-    var username: String
+    @Option(help: "The XS3 instance URL.")
+    var xs3Url: String = ""
 
-    @Argument(help: "The password.")
-    var password: String
+    @Option(help: "The username.")
+    var username: String = ""
+
+    @Option(help: "The password.")
+    var password: String = ""
 
     @Option(help: "The output path (defaults to ./out).")
     var outpath: String = "./out"
@@ -29,19 +32,58 @@ struct Get: AsyncParsableCommand {
 
     @Option(help: "The path for the process to be started after retrieving the certificates.")
     var startProcess: String = ""
+
     @Option(help: "The args for the to be started process.")
     var startProcessArgs: String = ""
 
-    var XS_PATH_LOGIN: String = "api/v1/login"
-    var XS_PATH_MQTTCONFIG: String = "api/v1/user/mqtt-configuration"
+    var XSPathLogin: String = "api/v1/login"
+    var XSPathMqttConfig: String = "api/v1/user/mqtt-configuration"
+
+    func readKeyValueFile(atPath path: String) -> [String: String] {
+      var dict = [String: String]()
+    
+      do {
+        // 1. Read the file content
+        let content = try String(contentsOfFile: path, encoding: .utf8)
+        
+        // 2. Split by newlines
+        let lines = content.components(separatedBy: .newlines)
+        
+        for line in lines {
+            // Skip empty lines or lines without '='
+            if line.isEmpty || !line.contains("=") { continue }
+            
+            // 3. Split each line into key and value
+            let parts = line.components(separatedBy: "=")
+            if parts.count >= 2 {
+                let key = parts[0].trimmingCharacters(in: .whitespaces)
+                let value = parts[1].trimmingCharacters(in: .whitespaces)
+                dict[key] = value
+            }
+        }
+      } catch {
+        print("Error reading file: \(error)")
+      }
+    
+      return dict
+    }
 
     mutating func run() async throws {
         let jsonDecoder = JSONDecoder()
 
         do {
             if #available(iOS 13, macOS 10.15, *) {
+                if !paramsFile.isEmpty { let params = readKeyValueFile(atPath: paramsFile)
+                xs3Url = params["xs3Url"] ?? xs3Url
+                username = params["username"] ?? username
+                password = params["password"] ?? password
+                outpath = params["outpath"] ?? outpath
+                requestTimeout = Int64(params["requestTimeout"] ?? String(requestTimeout)) ?? requestTimeout
+                startProcess = params["startProcess"] ?? startProcess
+                startProcessArgs = params["startProcessArgs"] ?? startProcessArgs }
+                print("Using parameters from params file: \(paramsFile)")
                 // 1. Do Login
-                let loginURL = "\(xs3Url)/\(XS_PATH_LOGIN)"
+                let loginURL = "\(xs3Url)/\(XSPathLogin)"
                 let loginBody: String = "{\"name\": \"\(username)\",\"password\":\"\(password)\"}"
                 print("Login at \(loginURL) as \(username)")
 
@@ -60,7 +102,7 @@ struct Get: AsyncParsableCommand {
                 var authToken: String = ""
                 if response.status == .ok {
                     let body: ByteBuffer = try await response.body.collect(upTo: 2048)  // max 2k
-                    let loginResponse = try! jsonDecoder.decode(LoginResponse.self, from: body)
+                    let loginResponse = try jsonDecoder.decode(LoginResponse.self, from: body)
 
                     authToken = loginResponse.token
                 } else {
@@ -70,8 +112,8 @@ struct Get: AsyncParsableCommand {
                             msg: "Login failed, please verify status code and reason.)"))
                 }
 
-                //2. Retrieve MQTT Client configuration
-                let mqttConfigUrl = "\(xs3Url)/\(XS_PATH_MQTTCONFIG)"
+                // 2. Retrieve MQTT Client configuration
+                let mqttConfigUrl = "\(xs3Url)/\(XSPathMqttConfig)"
                 print("Retrieving MQTT client config at \(mqttConfigUrl)")
                 var configRequest = HTTPClientRequest(url: mqttConfigUrl)
                 configRequest.method = .GET
@@ -87,7 +129,7 @@ struct Get: AsyncParsableCommand {
 
                     let configBody: ByteBuffer = try await configResponse.body.collect(
                         upTo: 1024 * 1024)  // max 1M
-                    let mqttConfigResponse: MqttConfigResponse = try! jsonDecoder.decode(
+                    let mqttConfigResponse: MqttConfigResponse = try jsonDecoder.decode(
                         MqttConfigResponse.self, from: configBody)
 
                     try mqttConfigResponse.ca.write(
@@ -97,7 +139,11 @@ struct Get: AsyncParsableCommand {
                     try mqttConfigResponse.key.write(
                         toFile: "\(outpath)/mqtt.key", atomically: true, encoding: .utf8)
                     let properties: String =
-                        "userid=\(mqttConfigResponse.apiProperties.userId)\nbroker.address=\(mqttConfigResponse.apiProperties.brokerAddress)\nbroker.port=\(mqttConfigResponse.apiProperties.brokerPort)\ntoken=\(mqttConfigResponse.apiProperties.token)\nbackend.address=\((xs3Url))\n"
+                        "userid=\(mqttConfigResponse.apiProperties.userId)\n" + 
+                        "broker.address=\(mqttConfigResponse.apiProperties.brokerAddress)\n" + 
+                        "broker.port=\(mqttConfigResponse.apiProperties.brokerPort)\n" + 
+                        "token=\(mqttConfigResponse.apiProperties.token)\n" + 
+                        "backend.address=\((xs3Url))\n"
                     try properties.write(
                         toFile: "\(outpath)/mqtt.properties", atomically: true, encoding: .utf8)
 
@@ -110,7 +156,7 @@ struct Get: AsyncParsableCommand {
                         ))
                 }
 
-                //3. Start the process if requested
+                // 3. Start the process if requested
                 if !startProcess.isEmpty {
 
                     let process = Process()
@@ -146,39 +192,4 @@ struct Get: AsyncParsableCommand {
             Get.exit(withError: GetError(kind: .connection, msg: "\(error)"))
         }
     }
-}
-
-struct LoginResponse: Decodable {
-    let id: String
-    let token: String
-    let installationUser: Bool
-    let role: String
-    let partitionId: String
-    let loginState: String
-}
-
-struct ApiProperties: Decodable {
-    let userId: String
-    let brokerAddress: String
-    let brokerPort: Int
-    let token: String
-}
-
-struct MqttConfigResponse: Decodable {
-    let ca: String
-    let cert: String
-    let key: String
-    let apiProperties: ApiProperties
-}
-
-struct GetError: Error {
-
-    enum Kind {
-        case connection
-        case login
-        case config
-    }
-
-    let kind: Kind
-    let msg: String
 }
