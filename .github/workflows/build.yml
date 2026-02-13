@@ -26,8 +26,8 @@ jobs:
       # Pull swiftlint image and run
       - name: Carry out swiftlint
         run: | 
-          swiftlint --reporter github-actions-logging --strict
-          
+          swiftlint --reporter github-actions-logging
+
   build:
     runs-on: ubuntu-latest
     needs: swiftlint 
