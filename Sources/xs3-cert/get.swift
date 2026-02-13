@@ -74,13 +74,13 @@ struct Get: AsyncParsableCommand {
         do {
             if #available(iOS 13, macOS 10.15, *) {
                 if !paramsFile.isEmpty { let params = readKeyValueFile(atPath: paramsFile)
-                xs3Url = params["xs3Url"] ?? xs3Url
-                username = params["username"] ?? username
-                password = params["password"] ?? password
-                outpath = params["outpath"] ?? outpath
-                requestTimeout = Int64(params["requestTimeout"] ?? String(requestTimeout)) ?? requestTimeout
-                startProcess = params["startProcess"] ?? startProcess
-                startProcessArgs = params["startProcessArgs"] ?? startProcessArgs }
+                xs3Url = params["XS3_URL"] ?? xs3Url
+                username = params["USERNAME"] ?? username
+                password = params["PASSWORD"] ?? password
+                outpath = params["OUTPATH"] ?? outpath
+                requestTimeout = Int64(params["REQUEST_TIMEOUT"] ?? String(requestTimeout)) ?? requestTimeout
+                startProcess = params["START_PROCESS"] ?? startProcess
+                startProcessArgs = params["START_PROCESS_ARGS"] ?? startProcessArgs }
                 print("Using parameters from params file: \(paramsFile)")
                 // 1. Do Login
                 let loginURL = "\(xs3Url)/\(XSPathLogin)"
